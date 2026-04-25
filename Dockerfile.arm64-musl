@@ -1,25 +1,26 @@
-FROM ubuntu:24.04
+FROM messense/rust-musl-cross:arm64-musl
 
 RUN apt-get update && apt-get install -y \
     curl \
     cmake \
     pkg-config \
-    gcc \
-    g++ \
     perl \
-    libssl-dev \
     git \
     ca-certificates \
+    wget \
+    make \
     && rm -rf /var/lib/apt/lists/*
 
-ENV RUSTUP_HOME=/usr/local/rustup \
-    CARGO_HOME=/usr/local/cargo \
-    PATH=/usr/local/cargo/bin:$PATH
-
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
-    && rustup target add aarch64-unknown-linux-musl
+RUN wget https://www.openssl.org/source/openssl-3.0.13.tar.gz && \
+    tar -xzf openssl-3.0.13.tar.gz && \
+    cd openssl-3.0.13 && \
+    CC=aarch64-unknown-linux-musl-gcc ./Configure linux-armv4 no-shared --prefix=/usr/local/musl/aarch64-unknown-linux-musl && \
+    make -j$(nproc) && \
+    make install_sw && \
+    cd .. && rm -rf openssl-3.0.13*
 
 ENV RUST_TARGET=aarch64-unknown-linux-musl
+
 WORKDIR /workspace
 
 COPY build-docker.sh /workspace/build-docker.sh
