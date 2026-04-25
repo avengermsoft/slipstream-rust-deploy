@@ -33,6 +33,18 @@ fi
 
 cd slipstream-rust
 
+case "$RUST_TARGET" in
+  aarch64-unknown-linux-musl)
+    export CC=aarch64-unknown-linux-musl-gcc
+    export CXX=aarch64-unknown-linux-musl-g++
+    export AR=aarch64-unknown-linux-musl-ar
+    export CFLAGS="-I/usr/local/musl/aarch64-unknown-linux-musl/include"
+    export CXXFLAGS="-I/usr/local/musl/aarch64-unknown-linux-musl/include"
+    export OPENSSL_ROOT_DIR="/usr/local/musl/aarch64-unknown-linux-musl"
+    export OPENSSL_DIR="/usr/local/musl/aarch64-unknown-linux-musl"
+    ;;
+esac
+
 echo "Building picoquic for $RUST_TARGET..."
 bash scripts/build_picoquic.sh
 
@@ -45,9 +57,12 @@ export PICOQUIC_AUTO_BUILD=1
 CARGO_FEATURES=""
 CARGO_EXTRA=""
 case "$RUST_TARGET" in
-  mips64-*|mips64el-*|mips-*|mipsel-*|-musl)
+  mips64-*|mips64el-*|mips-*|mipsel-*)
     CARGO_FEATURES="--features openssl-vendored"
     CARGO_EXTRA="-Z build-std=std,panic_abort"
+    ;;
+  aarch64-unknown-linux-musl)
+    CARGO_FEATURES="--features openssl-vendored"
     ;;
 esac
 
