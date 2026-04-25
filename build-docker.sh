@@ -45,7 +45,7 @@ export PICOQUIC_AUTO_BUILD=1
 CARGO_FEATURES=""
 CARGO_EXTRA=""
 case "$RUST_TARGET" in
-  mips64-*|mips64el-*|mips-*|mipsel-*)
+  mips64-*|mips64el-*|mips-*|mipsel-*|-musl)
     CARGO_FEATURES="--features openssl-vendored"
     CARGO_EXTRA="-Z build-std=std,panic_abort"
     ;;
